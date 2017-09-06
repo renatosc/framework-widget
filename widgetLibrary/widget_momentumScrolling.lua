@@ -1,6 +1,8 @@
 
 -- Abstract: widget.* momentum scrolling
 -- Code is MIT licensed; see https://www.coronalabs.com/links/code/license
+-- MODIFIED BY RED BEACH (RB) to:
+-- . add upside-down rotation support, so the scrolling can continue to work as expected if the widget (tableview/scrollview) was manually rotated upside-down but the build.settings is using a fixed "portrait"
 ---------------------------------------------------------------------------------------
 
 local Super = require "CoronaPrototype"
@@ -189,6 +191,11 @@ function lib._touch( view, event )
 	local time = event.time
 	local limit
 
+	-- RB: adding support to upside-down rotation - begin
+	local eventX, eventY = event.target:contentToLocal( event.x, event.y )
+	local eventXStart, eventYStart = event.target:contentToLocal( event.xStart, event.yStart )
+	-- RB: adding support to upside-down rotation - end
+
 
 	-- only apply the focus reset if the view is not used by the picker widget and the touch phase is began
 	if not view._isUsedInPickerWheel then
@@ -213,10 +220,16 @@ function lib._touch( view, event )
 
 	if "began" == phase then
 		-- Reset values
-		view._startXPos = event.x
-		view._startYPos = event.y
-		view._prevXPos = event.x
-		view._prevYPos = event.y
+		-- RB: adding support to upside-down rotation - begin
+		-- view._startXPos = event.x
+		-- view._startYPos = event.y
+		-- view._prevXPos = event.x
+		-- view._prevYPos = event.y
+		view._startXPos = eventX
+		view._startYPos = eventY
+		view._prevXPos = eventX
+		view._prevYPos = eventY
+		-- RB: adding support to upside-down rotation - end
 		view._prevX = 0
 		view._prevY = 0
 		view._delta = 0
@@ -243,9 +256,12 @@ function lib._touch( view, event )
 		if "moved" == phase then
 			-- Set the move direction
 			if not view._moveDirection then
-		        local dx = mAbs( event.x - event.xStart )
-	            local dy = mAbs( event.y - event.yStart )
-
+				-- RB: adding support to upside-down rotation - begin
+				--local dx = mAbs( event.x - event.xStart )
+	            --local dy = mAbs( event.y - event.yStart )
+				local dx = mAbs( eventX - eventXStart )
+	            local dy = mAbs( eventY - eventYStart )
+	            -- RB: adding support to upside-down rotation - end
 	            local moveThresh = 12
 
 	            if dx > moveThresh or dy > moveThresh then
@@ -339,9 +355,13 @@ function lib._touch( view, event )
 			else
 				-- If vertical scrolling is enabled
 				if not view._isVerticalScrollingDisabled then
+					-- RB: adding support to upside-down rotation - begin
+					--view._delta = event.y - view._prevYPos
+					--view._prevYPos = event.y
+					view._delta = eventY - view._prevYPos
+					view._prevYPos = eventY
+					-- RB: adding support to upside-down rotation - end
 
-					view._delta = event.y - view._prevYPos
-					view._prevYPos = event.y
 
 					-- If the view is more than the limits
 					if view.y < lib.upperLimit or view.y > lib.bottomLimit then
