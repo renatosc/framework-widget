@@ -1,6 +1,8 @@
 
 -- Abstract: widget.newTableView()
 -- Code is MIT licensed; see https://www.coronalabs.com/links/code/license
+-- MODIFIED BY RED BEACH (RB) to:
+-- . fix bug (Case 43930) Crash when reloading tableview after deleting 1st row
 ---------------------------------------------------------------------------------------
 
 local M =
@@ -1673,7 +1675,7 @@ local function createTableView( tableView, options )
 		end
 
 		-- we have to rerender the stuck category on the top, if it exists
-		if ( self._rows[ 1 ].isCategory ) then
+		if ( self._rows[ 1 ] and self._rows[ 1 ].isCategory ) then -- RB: fixed bug (Case 43930) Crash when reloading tableview after deleting 1st row
 			self:_renderCategory( self._rows[ 1 ], true )
 		end
 
