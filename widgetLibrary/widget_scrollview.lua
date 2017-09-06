@@ -1,6 +1,8 @@
 
 -- Abstract: widget.newScrollView()
 -- Code is MIT licensed; see https://www.coronalabs.com/links/code/license
+-- MODIFIED BY RED BEACH (RB) to:
+-- . fix bug of scrollview not being properly finalized when it is inside a composer sceneGroup and that sceneGroup is destroyed by composer
 ---------------------------------------------------------------------------------------
 
 local M =
@@ -640,6 +642,13 @@ local function createScrollView( scrollView, options )
   	-- EnterFrame listener for our scrollView
 	function view:enterFrame( event )
 		local _scrollView = self.parent
+
+		-- RB: The IF below is to fix the bug of scrollview not being properly finalized when it is inside a composer sceneGroup and that sceneGroup is destroyed by composer
+		if not _scrollView then
+			scrollView:_finalize()
+			return
+		end
+		-- RB: end
 
 		-- Handle momentum @ runtime
 		_scrollView._momentumScrolling._runtime( self, event )

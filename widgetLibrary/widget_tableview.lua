@@ -3,6 +3,7 @@
 -- Code is MIT licensed; see https://www.coronalabs.com/links/code/license
 -- MODIFIED BY RED BEACH (RB) to:
 -- . fix bug (Case 43930) Crash when reloading tableview after deleting 1st row
+-- . fix bug of tableview not being properly finalized when it is inside a composer sceneGroup and that sceneGroup is destroyed by composer
 ---------------------------------------------------------------------------------------
 
 local M =
@@ -568,6 +569,13 @@ local function createTableView( tableView, options )
 	-- EnterFrame listener for our tableView
 	function view:enterFrame( event )
 		local _tableView = self.parent
+
+		-- RB: The IF below is to fix the bug of tableview not being properly finalized when it is inside a composer sceneGroup and that sceneGroup is destroyed by composer
+		if not _tableView then
+			tableView:_finalize()
+			return
+		end
+		-- RB: end
 
 		-- If we have finished rendering all rows
 		if self._hasRenderedRows then
